@@ -1,7 +1,7 @@
 {
   "textures": {
-    "0": "zaharkuvalda:item/reinforced_sledgehammer",
-    "particle": "zaharkuvalda:item/reinforced_sledgehammer"
+    "0": "zaharkuvalda:item/reinforced_sledgehammer_3d",
+    "particle": "zaharkuvalda:item/reinforced_sledgehammer_3d"
   },
   "elements": [
     {
