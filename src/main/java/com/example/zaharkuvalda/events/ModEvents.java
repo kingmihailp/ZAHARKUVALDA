@@ -226,7 +226,7 @@ public class ModEvents {
         m.put("create:andesite_alloy",    "createdeco:andesite_alloy_sheet");
         // Create: Crafts & Additions
         m.put("createaddition:electrum_ingot", "createaddition:electrum_sheet");
-        m.put("create:zinc_ingot",             "create:zinc_sheet");
+        m.put("create:zinc_ingot",             "createaddition:zinc_sheet");
         // Create Deco
         m.put("createdeco:industrial_iron_ingot", "createdeco:industrial_iron_sheet");
         return m;
