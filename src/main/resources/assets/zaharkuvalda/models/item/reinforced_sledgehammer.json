@@ -1,6 +1,5 @@
 {
-  "parent": "item/generated",
-  "textures": {
-    "layer0": "zaharkuvalda:item/reinforced_sledgehammer"
-  }
+  "loader": "zaharkuvalda:perspective_aware",
+  "model_2d": "zaharkuvalda:item/reinforced_sledgehammer_2d",
+  "model_3d": "zaharkuvalda:item/reinforced_sledgehammer_3d"
 }
