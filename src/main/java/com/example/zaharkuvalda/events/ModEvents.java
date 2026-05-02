@@ -7,6 +7,7 @@ import com.example.zaharkuvalda.items.SledgehammerItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -19,10 +20,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.CampfireBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.AABB;
@@ -272,64 +273,49 @@ public class ModEvents {
         target.getItem().shrink(1);
         if (target.getItem().isEmpty()) target.discard();
 
-        ItemStack result = getCrushingResult(input);
+        ItemStack result = getCrushingResult(level, input);
         spawnItem(level, pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, result);
 
         damageSledgehammer(level, player, sledge, 1);
         level.playSound(null, pos, SoundEvents.GRINDSTONE_USE, SoundSource.BLOCKS, 1.0f, 0.8f);
     }
 
-    private static ItemStack getCrushingResult(ItemStack input) {
-        String inputId = BuiltInRegistries.ITEM.getKey(input.getItem()).toString();
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static ItemStack getCrushingResult(Level level, ItemStack input) {
+        if (level instanceof ServerLevel serverLevel) {
+            try {
+                ResourceLocation crushingTypeId = ResourceLocation.parse("create:crushing");
+                RecipeType<?> crushingType = BuiltInRegistries.RECIPE_TYPE.get(crushingTypeId);
 
-        // Mirrors Create crushing wheel recipes
-        Map<String, String> crushing = new LinkedHashMap<>();
-        crushing.put("minecraft:cobblestone", "minecraft:gravel");
-        crushing.put("minecraft:gravel", "minecraft:sand");
-        crushing.put("minecraft:sand", "minecraft:glass");
-        crushing.put("minecraft:stone", "minecraft:cobblestone");
-        crushing.put("minecraft:coal_ore", "minecraft:coal");
-        crushing.put("minecraft:deepslate_coal_ore", "minecraft:coal");
-        crushing.put("minecraft:iron_ore", "minecraft:raw_iron");
-        crushing.put("minecraft:deepslate_iron_ore", "minecraft:raw_iron");
-        crushing.put("minecraft:gold_ore", "minecraft:raw_gold");
-        crushing.put("minecraft:deepslate_gold_ore", "minecraft:raw_gold");
-        crushing.put("minecraft:copper_ore", "minecraft:raw_copper");
-        crushing.put("minecraft:deepslate_copper_ore", "minecraft:raw_copper");
-        crushing.put("minecraft:diamond_ore", "minecraft:diamond");
-        crushing.put("minecraft:deepslate_diamond_ore", "minecraft:diamond");
-        crushing.put("minecraft:emerald_ore", "minecraft:emerald");
-        crushing.put("minecraft:deepslate_emerald_ore", "minecraft:emerald");
-        crushing.put("minecraft:redstone_ore", "minecraft:redstone");
-        crushing.put("minecraft:deepslate_redstone_ore", "minecraft:redstone");
-        crushing.put("minecraft:lapis_ore", "minecraft:lapis_lazuli");
-        crushing.put("minecraft:deepslate_lapis_ore", "minecraft:lapis_lazuli");
-        crushing.put("minecraft:nether_quartz_ore", "minecraft:quartz");
-        crushing.put("minecraft:nether_gold_ore", "minecraft:gold_nugget");
-        crushing.put("minecraft:raw_iron", "minecraft:iron_ingot");
-        crushing.put("minecraft:raw_gold", "minecraft:gold_ingot");
-        crushing.put("minecraft:raw_copper", "minecraft:copper_ingot");
-        crushing.put("minecraft:sandstone", "minecraft:sand");
-        crushing.put("minecraft:red_sandstone", "minecraft:red_sand");
-        crushing.put("minecraft:blaze_rod", "minecraft:blaze_powder");
-        crushing.put("minecraft:bone", "minecraft:bone_meal");
-        crushing.put("minecraft:flint", "minecraft:gravel");
+                if (crushingType != null) {
+                    Collection<RecipeHolder<?>> recipes =
+                            serverLevel.getRecipeManager().getAllRecipesFor((RecipeType) crushingType);
 
-        String resultId = crushing.get(inputId);
-        if (resultId != null) {
-            ResourceLocation rl = ResourceLocation.tryParse(resultId);
-            if (rl != null && BuiltInRegistries.ITEM.containsKey(rl)) {
-                return new ItemStack(BuiltInRegistries.ITEM.get(rl));
+                    for (RecipeHolder<?> holder : recipes) {
+                        // Check if any ingredient of this recipe matches the input item
+                        boolean matches = holder.value().getIngredients().stream()
+                                .anyMatch(ing -> ing.test(input));
+                        if (matches) {
+                            ItemStack result = holder.value().getResultItem(serverLevel.registryAccess());
+                            if (!result.isEmpty()) {
+                                return result.copy();
+                            }
+                        }
+                    }
+                }
+            } catch (Exception ignored) {
+                // Create not installed or API mismatch — fall through to ash
             }
         }
 
-        // Fallback to ash
+        return getAsh();
+    }
+
+    private static ItemStack getAsh() {
         ResourceLocation ashId = ResourceLocation.parse("supplementaries:ash");
         if (BuiltInRegistries.ITEM.containsKey(ashId)) {
             return new ItemStack(BuiltInRegistries.ITEM.get(ashId));
         }
-
-        // If supplementaries not installed
         return new ItemStack(Items.SAND);
     }
 
