@@ -1,5 +1,3 @@
 {
-  "loader": "zaharkuvalda:perspective_aware",
-  "model_2d": "zaharkuvalda:item/sledgehammer_2d",
-  "model_3d": "zaharkuvalda:item/sledgehammer_3d"
+  "parent": "zaharkuvalda:item/sledgehammer_3d"
 }
