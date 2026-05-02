@@ -119,29 +119,33 @@ public class ModEvents {
                                         BlockState state, ItemStack sledge) {
         if (!state.getValue(BlockStateProperties.LIT)) return;
 
-        BlockEntity be = level.getBlockEntity(pos);
-        if (!(be instanceof CampfireBlockEntity campfire)) return;
+        // Search for ItemEntity items thrown onto/near the campfire
+        AABB searchBox = new AABB(pos.getX() - 0.5, pos.getY(), pos.getZ() - 0.5,
+                pos.getX() + 1.5, pos.getY() + 1.5, pos.getZ() + 1.5);
+        List<ItemEntity> nearby = level.getEntitiesOfClass(ItemEntity.class, searchBox);
 
-        net.minecraft.core.NonNullList<ItemStack> items = campfire.getItems();
+        ItemEntity ironEntity = null;
+        ItemEntity coalEntity = null;
 
-        int ironIndex = -1;
-        int coalIndex = -1;
-
-        for (int i = 0; i < items.size(); i++) {
-            ItemStack s = items.get(i);
-            if (s.isEmpty()) continue;
-            if (s.is(Items.IRON_INGOT) && ironIndex == -1) {
-                ironIndex = i;
-            } else if ((s.is(Items.COAL) || s.is(Items.CHARCOAL)) && coalIndex == -1) {
-                coalIndex = i;
+        for (ItemEntity ie : nearby) {
+            if (ironEntity == null && ie.getItem().is(Items.IRON_INGOT)) {
+                ironEntity = ie;
+            } else if (coalEntity == null
+                    && (ie.getItem().is(Items.COAL) || ie.getItem().is(Items.CHARCOAL))) {
+                coalEntity = ie;
             }
+            if (ironEntity != null && coalEntity != null) break;
         }
 
-        if (ironIndex == -1 || coalIndex == -1) return;
+        if (ironEntity == null || coalEntity == null) return;
 
-        // Remove one of each
-        items.get(ironIndex).shrink(1);
-        items.get(coalIndex).shrink(1);
+        // Consume one iron ingot
+        ironEntity.getItem().shrink(1);
+        if (ironEntity.getItem().isEmpty()) ironEntity.discard();
+
+        // Consume one coal
+        coalEntity.getItem().shrink(1);
+        if (coalEntity.getItem().isEmpty()) coalEntity.discard();
 
         // Extinguish campfire
         level.setBlock(pos, state.setValue(BlockStateProperties.LIT, false), 3);
@@ -152,7 +156,6 @@ public class ModEvents {
 
         damageSledgehammer(level, player, sledge, 1);
         level.playSound(null, pos, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 1.0f, 0.8f);
-        be.setChanged();
     }
 
     private static ItemStack getCastIronIngot() {
@@ -206,26 +209,44 @@ public class ModEvents {
         level.playSound(null, pos, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 1.0f, 1.2f);
     }
 
+    // Ingot → Sheet map. Key = ingot item id, Value = sheet item id.
+    private static final Map<String, String> INGOT_TO_SHEET = buildIngotSheetMap();
+
+    private static Map<String, String> buildIngotSheetMap() {
+        Map<String, String> m = new LinkedHashMap<>();
+        // Vanilla
+        m.put("minecraft:iron_ingot",     "create:iron_sheet");
+        m.put("minecraft:copper_ingot",   "create:copper_sheet");
+        m.put("minecraft:gold_ingot",     "create:golden_sheet");
+        m.put("minecraft:netherite_ingot","create:netherite_sheet");
+        // TFMG
+        m.put("tfmg:cast_iron_ingot",     "create:iron_sheet");
+        // Create
+        m.put("create:brass_ingot",       "create:brass_sheet");
+        m.put("create:andesite_alloy",    "createdeco:andesite_alloy_sheet");
+        // Create: Crafts & Additions
+        m.put("createaddition:electrum_ingot", "createaddition:electrum_sheet");
+        m.put("createaddition:zinc_ingot",     "createaddition:zinc_sheet");
+        // Create Deco
+        m.put("createdeco:industrial_iron_ingot", "createdeco:industrial_iron_sheet");
+        return m;
+    }
+
     private static boolean isIngot(ItemStack stack) {
         String id = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
-        return stack.is(Items.IRON_INGOT)
+        return INGOT_TO_SHEET.containsKey(id)
+                || stack.is(Items.IRON_INGOT)
                 || stack.is(Items.GOLD_INGOT)
                 || stack.is(Items.COPPER_INGOT)
                 || stack.is(Items.NETHERITE_INGOT)
-                || id.endsWith("_ingot");
+                || id.endsWith("_ingot")
+                || id.equals("create:andesite_alloy");
     }
 
     private static ItemStack getSheetForIngot(ItemStack ingot) {
         String ingotId = BuiltInRegistries.ITEM.getKey(ingot.getItem()).toString();
 
-        Map<String, String> sheets = new LinkedHashMap<>();
-        sheets.put("minecraft:iron_ingot", "create:iron_sheet");
-        sheets.put("minecraft:copper_ingot", "create:copper_sheet");
-        sheets.put("minecraft:gold_ingot", "create:golden_sheet");
-        sheets.put("minecraft:netherite_ingot", "create:netherite_sheet");
-        sheets.put("tfmg:cast_iron_ingot", "create:iron_sheet");
-
-        String sheetId = sheets.get(ingotId);
+        String sheetId = INGOT_TO_SHEET.get(ingotId);
         if (sheetId != null) {
             ResourceLocation rl = ResourceLocation.tryParse(sheetId);
             if (rl != null && BuiltInRegistries.ITEM.containsKey(rl)) {
@@ -233,7 +254,7 @@ public class ModEvents {
             }
         }
 
-        // Return original ingot as fallback
+        // Return original item as fallback
         return ingot.copy();
     }
 
