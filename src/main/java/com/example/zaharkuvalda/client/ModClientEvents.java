@@ -1,6 +1,7 @@
 package com.example.zaharkuvalda.client;
 
 import com.example.zaharkuvalda.ZaharkuvaldaMod;
+import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -11,6 +12,9 @@ public class ModClientEvents {
 
     @SubscribeEvent
     public static void onRegisterGeometryLoaders(ModelEvent.RegisterGeometryLoaders event) {
-        event.register(PerspectiveModelLoader.ID, new PerspectiveModelLoader());
+        event.register(
+            ResourceLocation.fromNamespaceAndPath(ZaharkuvaldaMod.MODID, PerspectiveModelLoader.ID),
+            new PerspectiveModelLoader()
+        );
     }
 }
