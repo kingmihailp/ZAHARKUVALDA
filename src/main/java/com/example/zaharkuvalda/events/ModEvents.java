@@ -93,7 +93,7 @@ public class ModEvents {
         // Damage the brush
         if (!player.isCreative()) {
             stack.hurtAndBreak(1, (ServerLevel) level, (ServerPlayer) player,
-                    item -> player.onEquippedItemBroken(item, InteractionHand.MAIN_HAND));
+                    item -> player.onEquippedItemBroken(item, net.minecraft.world.entity.EquipmentSlot.MAINHAND));
         }
 
         // Try to spawn a resource
@@ -195,7 +195,12 @@ public class ModEvents {
 
         // 5% chance to damage anvil
         if (level.random.nextFloat() < 0.05f) {
-            AnvilBlock.damage(state, level, pos);
+            BlockState damagedState = AnvilBlock.damage(state);
+            if (damagedState == null) {
+                level.removeBlock(pos, false);
+            } else {
+                level.setBlock(pos, damagedState, 2);
+            }
         }
 
         level.playSound(null, pos, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 1.0f, 1.2f);
@@ -389,7 +394,7 @@ public class ModEvents {
     private static void damageSledgehammer(Level level, Player player, ItemStack stack, int amount) {
         if (!player.isCreative() && level instanceof ServerLevel serverLevel) {
             stack.hurtAndBreak(amount, serverLevel, (ServerPlayer) player,
-                    item -> player.onEquippedItemBroken(item, InteractionHand.MAIN_HAND));
+                    item -> player.onEquippedItemBroken(item, net.minecraft.world.entity.EquipmentSlot.MAINHAND));
         }
     }
 }

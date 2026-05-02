@@ -54,7 +54,7 @@ public class ReinforcedSledgehammerRecipe extends CustomRecipe {
         int maxDurability = sledgehammer.getMaxDamage();
         int remainingDurability = maxDurability - currentDamage;
 
-        int newMax = ModItems.REINFORCED_SLEDGEHAMMER.get().getMaxDamage();
+        int newMax = new ItemStack(ModItems.REINFORCED_SLEDGEHAMMER.get()).getMaxDamage();
         int newDurability = Math.min(remainingDurability * 2, newMax);
         int newDamage = newMax - newDurability;
 
