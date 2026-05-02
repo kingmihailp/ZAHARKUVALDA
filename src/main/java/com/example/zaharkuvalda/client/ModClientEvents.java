@@ -14,10 +14,10 @@ import java.util.Map;
 @EventBusSubscriber(modid = ZaharkuvaldaMod.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class ModClientEvents {
 
-    private static final ResourceLocation SLEDGEHAMMER_3D =
-        ResourceLocation.fromNamespaceAndPath(ZaharkuvaldaMod.MODID, "item/sledgehammer_3d");
-    private static final ResourceLocation REINFORCED_3D =
-        ResourceLocation.fromNamespaceAndPath(ZaharkuvaldaMod.MODID, "item/reinforced_sledgehammer_3d");
+    private static final ModelResourceLocation SLEDGEHAMMER_3D =
+        ModelResourceLocation.standalone(ResourceLocation.fromNamespaceAndPath(ZaharkuvaldaMod.MODID, "item/sledgehammer_3d"));
+    private static final ModelResourceLocation REINFORCED_3D =
+        ModelResourceLocation.standalone(ResourceLocation.fromNamespaceAndPath(ZaharkuvaldaMod.MODID, "item/reinforced_sledgehammer_3d"));
 
     @SubscribeEvent
     public static void onRegisterAdditional(ModelEvent.RegisterAdditional event) {
@@ -35,9 +35,8 @@ public class ModClientEvents {
             REINFORCED_3D);
     }
 
-    private static void swap(ModelEvent.BakingCompleted event, ResourceLocation itemRl, ResourceLocation rl3d) {
+    private static void swap(ModelEvent.BakingCompleted event, ResourceLocation itemRl, ModelResourceLocation key3d) {
         ModelResourceLocation itemKey = ModelResourceLocation.inventory(itemRl);
-        ModelResourceLocation key3d  = ModelResourceLocation.standalone(rl3d);
 
         Map<ModelResourceLocation, BakedModel> models = event.getModels();
         BakedModel model2d = models.get(itemKey);
