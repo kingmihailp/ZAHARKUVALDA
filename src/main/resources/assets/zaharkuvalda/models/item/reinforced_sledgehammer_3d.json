@@ -3,8 +3,8 @@
 	"credit": "Made with Blockbench",
 	"texture_size": [32, 32],
 	"textures": {
-		"0": "item/reinforced_sledgehammer_3d",
-		"particle": "block/normal_sledgehammer"
+		"0": "zaharkuvalda:item/reinforced_sledgehammer_3d",
+		"particle": "zaharkuvalda:item/reinforced_sledgehammer_3d"
 	},
 	"elements": [
 		{
