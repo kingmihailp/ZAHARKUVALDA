@@ -225,6 +225,7 @@ public class ModEvents {
         m.put("tfmg:lead_ingot",             "tfmg:lead_sheet");
         m.put("tfmg:aluminum_ingot",         "tfmg:aluminum_sheet");
         m.put("tfmg:magnetic_alloy_ingot",   "tfmg:magnetic_alloy_sheet");
+        m.put("tfmg:nickel_ingot",           "tfmg:nickel_sheet");
         // Create
         m.put("create:brass_ingot",       "create:brass_sheet");
         m.put("create:andesite_alloy",    "createdeco:andesite_alloy_sheet");
