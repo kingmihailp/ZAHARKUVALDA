@@ -221,7 +221,10 @@ public class ModEvents {
         m.put("minecraft:gold_ingot",     "create:golden_sheet");
         m.put("minecraft:netherite_ingot","create:netherite_sheet");
         // TFMG
-        m.put("tfmg:cast_iron_ingot",     "create:iron_sheet");
+        m.put("tfmg:cast_iron_ingot",        "tfmg:cast_iron_sheet");
+        m.put("tfmg:lead_ingot",             "tfmg:lead_sheet");
+        m.put("tfmg:aluminum_ingot",         "tfmg:aluminum_sheet");
+        m.put("tfmg:magnetic_alloy_ingot",   "tfmg:magnetic_alloy_sheet");
         // Create
         m.put("create:brass_ingot",       "create:brass_sheet");
         m.put("create:andesite_alloy",    "createdeco:andesite_alloy_sheet");
@@ -230,6 +233,8 @@ public class ModEvents {
         m.put("create:zinc_ingot",             "createaddition:zinc_sheet");
         // Create Deco
         m.put("createdeco:industrial_iron_ingot", "createdeco:industrial_iron_sheet");
+        // Vanilla blocks
+        m.put("minecraft:lapis_block",    "ccbr:lapis_sheet");
         return m;
     }
 
@@ -241,7 +246,8 @@ public class ModEvents {
                 || stack.is(Items.COPPER_INGOT)
                 || stack.is(Items.NETHERITE_INGOT)
                 || id.endsWith("_ingot")
-                || id.equals("create:andesite_alloy");
+                || id.equals("create:andesite_alloy")
+                || id.endsWith("_block") && INGOT_TO_SHEET.containsKey(id);
     }
 
     private static ItemStack getSheetForIngot(ItemStack ingot) {
