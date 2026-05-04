@@ -25,7 +25,7 @@ public class ReinforcedSledgehammerItem extends PickaxeItem {
     };
 
     public ReinforcedSledgehammerItem(Item.Properties properties) {
-        super(TIER, properties.attributes(PickaxeItem.createAttributes(TIER, 5, -3.4f)));
+        super(TIER, properties.attributes(PickaxeItem.createAttributes(TIER, 8, -3.4f)));
     }
 
     @Override
